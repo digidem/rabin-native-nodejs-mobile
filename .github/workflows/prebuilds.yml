@@ -1,0 +1,52 @@
+name: Build, test, and release prebuilds
+
+# This workflow builds nodejs-mobile prebuilds for an npm-published native
+# module across all standard targets, tests them on an Android emulator and
+# iOS simulator, and publishes a GitHub Release with the artifacts.
+
+on:
+  workflow_dispatch:
+    inputs:
+      module_name:
+        description: "npm module name"
+        required: true
+        type: string
+        default: "rabin-native"
+      module_version:
+        description: "Exact version or dist-tag"
+        required: false
+        default: "latest"
+        type: string
+      publish_release:
+        description: "Publish release"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  build:
+    uses: digidem/nodejs-mobile-bare-prebuilds/.github/workflows/prebuild-all.yml@v2
+    with:
+      module_name: ${{ inputs.module_name }}
+      module_version: ${{ inputs.module_version }}
+
+  test-android:
+    needs: build
+    uses: digidem/nodejs-mobile-bare-prebuilds/.github/workflows/test-android.yml@v2
+    with:
+      module_spec: ${{ needs.build.outputs.module_spec }}
+
+  test-ios:
+    needs: build
+    uses: digidem/nodejs-mobile-bare-prebuilds/.github/workflows/test-ios.yml@v2
+    with:
+      module_spec: ${{ needs.build.outputs.module_spec }}
+
+  release:
+    if: ${{ inputs.publish_release }}
+    needs: [ build, test-android, test-ios ]
+    permissions:
+      contents: write
+    uses: digidem/nodejs-mobile-bare-prebuilds/.github/workflows/release.yml@v2
+    with:
+      module_spec: ${{ needs.build.outputs.module_spec }}
