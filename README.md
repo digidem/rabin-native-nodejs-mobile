@@ -1,4 +1,4 @@
-# crc-native-nodejs-mobile
+# rabin-native-nodejs-mobile
 
 [NodeJS Mobile](https://github.com/nodejs-mobile/nodejs-mobile) prebuilds for
 [`rabin-native`](https://github.com/holepunchto/rabin-native)
